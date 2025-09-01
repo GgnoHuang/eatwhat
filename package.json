@@ -1,0 +1,22 @@
+{
+  "name": "wheel-of-food",
+  "version": "1.0.0",
+  "description": "轉盤選餐應用程式",
+  "main": "index.html",
+  "scripts": {
+    "dev": "live-server --port=3000 --open=/index.html",
+    "start": "live-server --port=3000 --open=/index.html",
+    "install-deps": "npm install -g live-server"
+  },
+  "keywords": [
+    "wheel",
+    "food",
+    "random",
+    "selector"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2"
+  }
+}

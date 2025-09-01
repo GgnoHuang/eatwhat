@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>吃啥轉盤</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>吃啥轉盤</h1>
+        
+        <!-- 分類篩選 -->
+        <div class="category-filter">
+            <button class="category-btn active" data-category="all">全部</button>
+            <div id="categoryButtons"></div>
+        </div>
+
+        <!-- 轉盤容器 -->
+        <div class="wheel-container">
+            <div class="wheel" id="wheel">
+                <!-- 轉盤項目將由 JavaScript 動態生成 -->
+            </div>
+            <div class="wheel-pointer"></div>
+        </div>
+
+        <!-- 控制按鈕 -->
+        <div class="controls">
+            <button id="spinBtn" class="spin-btn">開始轉轉</button>
+            <div class="result" id="result"></div>
+        </div>
+
+
+        <!-- 分類管理彈窗 -->
+        <div class="modal-overlay" id="categoryModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>標籤管理</h3>
+                    <button class="modal-close" id="closeCategoryManagementBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="category-input">
+                        <input type="text" id="newCategoryName" placeholder="新增標籤名稱">
+                        <button id="addCategoryBtn">新增標籤</button>
+                    </div>
+                    <div id="categoriesList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新增餐點彈窗 -->
+        <div class="modal-overlay" id="addItemModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>新增餐點</h3>
+                    <button class="modal-close" id="closeAddItemBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="item-input">
+                        <input type="text" id="modalItemName" placeholder="輸入餐點名稱">
+                    </div>
+                    <div class="price-selection">
+                        <label>價格等級：</label>
+                        <div class="price-options">
+                            <label class="price-option selected">
+                                <input type="radio" name="modal-price" value="$" checked>
+                                $
+                            </label>
+                            <label class="price-option">
+                                <input type="radio" name="modal-price" value="$$">
+                                $$
+                            </label>
+                            <label class="price-option">
+                                <input type="radio" name="modal-price" value="$$$">
+                                $$$
+                            </label>
+                        </div>
+                    </div>
+                    <div class="taste-selection">
+                        <label>好吃程度：</label>
+                        <div class="taste-options">
+                            <label class="taste-option selected">
+                                <input type="radio" name="modal-taste" value="ok" checked>
+                                ok
+                            </label>
+                            <label class="taste-option">
+                                <input type="radio" name="modal-taste" value="好吃">
+                                好吃
+                            </label>
+                            <label class="taste-option">
+                                <input type="radio" name="modal-taste" value="讚">
+                                讚
+                            </label>
+                        </div>
+                    </div>
+                    <div class="tags-selection">
+                        <label>選擇標籤：</label>
+                        <div id="modalTagsCheckboxes" class="tags-checkboxes"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="modalAddBtn" class="primary-btn">新增餐點</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 餐點列表 -->
+        <div class="items-list">
+            <div class="list-header">
+                <!-- <h3>現有餐點</h3> -->
+                <div class="sort-controls">
+                    <label for="sortBy">排序：</label>
+                    <select id="sortBy">
+                        <option value="name">名稱</option>
+                        <option value="date">新增時間</option>
+                        <option value="tags">標籤數量</option>
+                        <option value="price">價格</option>
+                        <option value="taste">好吃程度</option>
+                    </select>
+                    <button id="sortOrder" class="sort-order-btn" data-order="asc">↑</button>
+                </div>
+            </div>
+            <div id="itemsList" class="items-grid"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
