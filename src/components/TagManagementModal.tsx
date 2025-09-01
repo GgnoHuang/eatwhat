@@ -106,7 +106,7 @@ export default function TagManagementModal({ categories, onAddTag, onUpdateTag, 
                       value={editingName}
                       onChange={(e) => setEditingName(e.target.value)}
                       className="flex-1 px-3 py-1 border border-gray-300 rounded focus:border-blue-500 focus:outline-none text-gray-900"
-                      style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}
+                      style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}
                       autoFocus
                     />
                     <button
@@ -126,7 +126,7 @@ export default function TagManagementModal({ categories, onAddTag, onUpdateTag, 
                 ) : (
                   // 顯示模式
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-800" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>
+                    <span className="font-semibold text-gray-800" style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}>
                       {category}
                     </span>
                     <div className="flex gap-2">

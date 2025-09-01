@@ -134,7 +134,7 @@ export default function WheelSpinner({ items }: Props) {
                               fontSize="30"
                               fontWeight="bold"
                               style={{
-                                fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                 filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                               }}
                             >
@@ -158,7 +158,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="26"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -173,7 +173,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="26"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -199,7 +199,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="22"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -214,7 +214,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="22"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -229,7 +229,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="22"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -256,7 +256,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -271,7 +271,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -286,7 +286,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -301,7 +301,7 @@ export default function WheelSpinner({ items }: Props) {
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
-                                  fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                                  fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                                   filter: 'drop-shadow(3px 3px 6px rgba(0, 0, 0, 1)) drop-shadow(0px 0px 8px rgba(0, 0, 0, 0.8))'
                                 }}
                               >
@@ -336,14 +336,14 @@ export default function WheelSpinner({ items }: Props) {
             ? 'bg-gray-400 cursor-not-allowed' 
             : 'bg-blue-500 hover:bg-blue-600 hover:-translate-y-1 hover:scale-105 heartbeat cursor-pointer'
         }`}
-        style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}
+        style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}
       >
         {isSpinning ? '轉轉中...' : '開始轉轉'}
       </button>
 
       {/* 結果 */}
       {result && (
-        <div className="mt-6 text-2xl font-bold text-blue-600 bounce-in" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>
+        <div className="mt-6 text-2xl font-bold text-blue-600 bounce-in" style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}>
           {result}
         </div>
       )}

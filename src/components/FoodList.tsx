@@ -28,12 +28,12 @@ export default function FoodList({
       {/* 排序控制 */}
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
-          <label className="text-sm text-gray-800 font-medium" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>排序：</label>
+          <label className="text-sm text-gray-800 font-medium" style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}>排序：</label>
           <select
             value={sortBy}
             onChange={(e) => onSortByChange(e.target.value)}
             className="px-3 py-1 border border-gray-400 rounded-md text-sm text-gray-800 bg-white focus:border-blue-500 focus:outline-none"
-            style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}
+            style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}
           >
             <option value="date">新增時間</option>
             <option value="price">價格</option>
@@ -42,7 +42,7 @@ export default function FoodList({
           <button
             onClick={onSortOrderToggle}
             className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm font-bold hover:bg-blue-600 hover:scale-110 transition-all cursor-pointer"
-            style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}
+            style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}
           >
             {sortOrder === 'asc' ? '↑' : '↓'}
           </button>
@@ -103,10 +103,10 @@ export default function FoodList({
 
             {/* 左上角標籤 */}
             <div className="absolute top-2 left-2 flex gap-1 z-10">
-              <span className="bg-white bg-opacity-90 text-gray-700 text-xs font-bold px-2 py-1 rounded shadow" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>
+              <span className="bg-white bg-opacity-90 text-gray-700 text-xs font-bold px-2 py-1 rounded shadow" style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}>
                 {item.price}
               </span>
-              <span className="bg-white bg-opacity-90 text-gray-700 text-xs font-bold px-2 py-1 rounded shadow" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>
+              <span className="bg-white bg-opacity-90 text-gray-700 text-xs font-bold px-2 py-1 rounded shadow" style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}>
                 {item.taste}
               </span>
             </div>
@@ -125,7 +125,7 @@ export default function FoodList({
             <div className="absolute inset-0 flex items-center justify-center px-3 z-5">
               <h3 className="text-yellow-400 font-bold text-center text-lg leading-tight"
                   style={{ 
-                    fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif',
+                    fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                     textShadow: '3px 3px 6px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.8), 1px 1px 2px rgba(0, 0, 0, 1)'
                   }}>
                 {item.name}
@@ -136,7 +136,7 @@ export default function FoodList({
       </div>
 
       {loading && (
-        <div className="text-center py-4 text-gray-700" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>
+        <div className="text-center py-4 text-gray-700" style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}>
           載入中...
         </div>
       )}
