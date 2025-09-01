@@ -27,11 +27,12 @@ export default function FoodWheel() {
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>(['all'])
   const [sortBy, setSortBy] = useState('date')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
   const [showAddModal, setShowAddModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showTagModal, setShowTagModal] = useState(false)
   const [editingItem, setEditingItem] = useState<typeof items[0] | null>(null)
+  const [isSpinning, setIsSpinning] = useState(false)
 
   // 標籤切換邏輯
   const handleCategoryToggle = (category: string) => {
@@ -141,9 +142,13 @@ export default function FoodWheel() {
           selectedCategories={selectedCategories}
           onCategoryToggle={handleCategoryToggle}
           onManageTags={() => setShowTagModal(true)}
+          disabled={isSpinning}
         />
 
-        <WheelSpinner items={filteredItems} />
+        <WheelSpinner 
+          items={filteredItems} 
+          onSpinningChange={setIsSpinning}
+        />
 
         <FoodList
           items={sortedItems}

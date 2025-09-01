@@ -4,9 +4,10 @@ import React, { useState } from 'react'
 
 interface Props {
   items: Array<{ name: string; imageUrl?: string }>
+  onSpinningChange?: (spinning: boolean) => void
 }
 
-export default function WheelSpinner({ items }: Props) {
+export default function WheelSpinner({ items, onSpinningChange }: Props) {
   const [isSpinning, setIsSpinning] = useState(false)
   const [result, setResult] = useState('')
   const [rotation, setRotation] = useState(0)
@@ -22,6 +23,7 @@ export default function WheelSpinner({ items }: Props) {
 
     setIsSpinning(true)
     setResult('')
+    onSpinningChange?.(true) // 通知父組件開始轉動
 
     // 計算隨機角度和時間
     const spins = 5 + Math.random() * 4 // 5-9圈
@@ -42,6 +44,7 @@ export default function WheelSpinner({ items }: Props) {
 
       setResult(`🎉 ${selectedItem.name}`)
       setIsSpinning(false)
+      onSpinningChange?.(false) // 通知父組件結束轉動
     }, duration)
   }
 

@@ -123,7 +123,7 @@ export default function FoodList({
 
             {/* 餐點名稱 */}
             <div className="absolute inset-0 flex items-center justify-center px-3 z-5">
-              <h3 className="text-yellow-400 font-bold text-center text-lg leading-tight"
+              <h3 className="text-yellow-300 font-bold text-center text-3xl leading-tight"
                   style={{ 
                     fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
                     textShadow: '3px 3px 6px rgba(0, 0, 0, 1), 0 0 8px rgba(0, 0, 0, 0.8), 1px 1px 2px rgba(0, 0, 0, 1)'
