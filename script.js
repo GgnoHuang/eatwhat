@@ -1,31 +1,28 @@
 class WheelOfFood {
     constructor() {
-        this.items = [
-            { name: '牛肉麵', tags: ['麵', '熱食'], price: '$$', taste: '好吃', dateAdded: Date.now() - 7000000 },
-            { name: '雞湯', tags: ['湯', '熱食'], price: '$', taste: 'ok', dateAdded: Date.now() - 6000000 },
-            { name: '炒飯', tags: ['飯', '熱食'], price: '$', taste: '好吃', dateAdded: Date.now() - 5000000 },
-            { name: '拉麵', tags: ['麵', '熱食'], price: '$$', taste: '讚', dateAdded: Date.now() - 4000000 },
-            { name: '玉米濃湯', tags: ['湯', '熱食'], price: '$', taste: 'ok', dateAdded: Date.now() - 3000000 },
-            { name: '滷肉飯', tags: ['飯', '熱食'], price: '$', taste: '好吃', dateAdded: Date.now() - 2000000 },
-            { name: '義大利麵', tags: ['麵', '熱食'], price: '$$', taste: '讚', dateAdded: Date.now() - 1000000 },
-            { name: '漢堡', tags: ['其他', '熱食'], price: '$$', taste: 'ok', dateAdded: Date.now() }
-        ];
-        this.categories = ['湯', '麵', '飯', '其他']; // 預設分類
+        this.items = [];
+        this.categories = [];
         this.currentCategory = 'all';
         this.isSpinning = false;
-        this.sortBy = 'name'; // 預設按名稱排序
-        this.sortOrder = 'asc'; // 預設遞增排序
+        this.sortBy = 'name';
+        this.sortOrder = 'asc';
         
-        // 載入儲存的資料
-        this.loadData();
+        // 從環境變數讀取配置
+        this.supabaseUrl = window.ENV?.SUPABASE_URL;
+        this.supabaseKey = window.ENV?.SUPABASE_API_KEY;
+        
+        if (!this.supabaseUrl || !this.supabaseKey) {
+            console.error('缺少必要的環境變數配置');
+        }
+        
+        // UUID 雙向映射管理
+        this.tagNameToId = new Map();
+        this.tagIdToName = new Map();
+        this.tagData = new Map(); // 完整標籤資料
         
         this.initializeElements();
         this.bindEvents();
-        this.updateCategoryButtons();
-        this.updateModalTagsCheckboxes();
-        this.setupPriceSelectors();
-        this.updateWheel();
-        this.updateItemsList();
+        this.loadFromSupabase();
     }
     
     initializeElements() {
@@ -34,9 +31,17 @@ class WheelOfFood {
         this.result = document.getElementById('result');
         this.addItemModal = document.getElementById('addItemModal');
         this.modalItemName = document.getElementById('modalItemName');
+        this.modalItemImage = document.getElementById('modalItemImage');
         this.modalTagsCheckboxes = document.getElementById('modalTagsCheckboxes');
         this.modalAddBtn = document.getElementById('modalAddBtn');
         this.closeAddItemBtn = document.getElementById('closeAddItemBtn');
+        this.editItemModal = document.getElementById('editItemModal');
+        this.editItemName = document.getElementById('editItemName');
+        this.editItemImage = document.getElementById('editItemImage');
+        this.editTagsCheckboxes = document.getElementById('editTagsCheckboxes');
+        this.editSaveBtn = document.getElementById('editSaveBtn');
+        this.editDeleteBtn = document.getElementById('editDeleteBtn');
+        this.closeEditItemBtn = document.getElementById('closeEditItemBtn');
         this.itemsList = document.getElementById('itemsList');
         this.sortBySelect = document.getElementById('sortBy');
         this.sortOrderBtn = document.getElementById('sortOrder');
@@ -46,6 +51,7 @@ class WheelOfFood {
         this.addCategoryBtn = document.getElementById('addCategoryBtn');
         this.categoriesList = document.getElementById('categoriesList');
         this.closeCategoryManagementBtn = document.getElementById('closeCategoryManagementBtn');
+        this.currentEditingIndex = -1;
     }
     
     bindEvents() {
@@ -54,6 +60,14 @@ class WheelOfFood {
         this.closeAddItemBtn.addEventListener('click', () => this.hideAddItemModal());
         this.modalItemName.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') this.addItemFromModal();
+        });
+        
+        // 編輯餐點彈窗事件
+        this.editSaveBtn.addEventListener('click', () => this.saveEditItemFromModal());
+        this.editDeleteBtn.addEventListener('click', () => this.deleteItemFromModal());
+        this.closeEditItemBtn.addEventListener('click', () => this.hideEditItemModal());
+        this.editItemName.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.saveEditItemFromModal();
         });
         
         // 分類管理事件將通過動態添加的按鈕處理
@@ -72,6 +86,12 @@ class WheelOfFood {
             }
         });
         
+        this.editItemModal.addEventListener('click', (e) => {
+            if (e.target === this.editItemModal) {
+                this.hideEditItemModal();
+            }
+        });
+        
         // ESC 鍵關閉彈窗
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -80,6 +100,9 @@ class WheelOfFood {
                 }
                 if (this.addItemModal.style.display === 'flex') {
                     this.hideAddItemModal();
+                }
+                if (this.editItemModal.style.display === 'flex') {
+                    this.hideEditItemModal();
                 }
             }
         });
@@ -247,14 +270,13 @@ class WheelOfFood {
             const finalAngleNormalized = finalAngle % 360;
             
             // 正確的角度計算：
-            // 1. 轉盤生成時，第一個項目從0度開始，但經過-90度調整後實際在270度位置（12點）
-            // 2. 指針固定在12點方向（0度位置）
+            // 1. 轉盤生成時從-90度開始，第一個項目在12點鐘方向（0度視覺位置）
+            // 2. 指針固定在12點方向
             // 3. 轉盤順時針旋轉了finalAngleNormalized度
-            // 4. 指針相對於轉盤的角度需要考慮到轉盤初始偏移
+            // 4. 指針相對轉盤的角度 = -轉盤旋轉角度
             
-            // 將指針位置（0度）轉換為相對於轉盤起始位置的角度
-            // 指針指向的角度 = 轉盤的負旋轉角度 + 90度偏移
-            let pointerRelativeAngle = (90 - finalAngleNormalized + 360) % 360;
+            // 計算指針相對於轉盤的角度
+            let pointerRelativeAngle = (-finalAngleNormalized + 360) % 360;
             
             // 根據相對角度計算指向哪個項目
             const actualPointingIndex = Math.floor(pointerRelativeAngle / itemAngle) % filteredItems.length;
@@ -264,7 +286,7 @@ class WheelOfFood {
             this.result.textContent = `🎉 ${actualPointingItem.name}`;
             this.result.style.color = '#7c9fb3';
             
-            // 調試信息（臨時）
+            // 調試信息
             console.log(`最終角度: ${finalAngle.toFixed(2)}度`);
             console.log(`正規化最終角度: ${finalAngleNormalized.toFixed(2)}度`);
             console.log(`指針相對角度: ${pointerRelativeAngle.toFixed(2)}度`);
@@ -292,6 +314,7 @@ class WheelOfFood {
         this.addItemModal.style.display = 'none';
         document.body.style.overflow = 'auto';
         this.modalItemName.value = '';
+        this.modalItemImage.value = '';
         // 清除所有勾選
         const checkboxes = this.modalTagsCheckboxes.querySelectorAll('input[type="checkbox"]');
         checkboxes.forEach(cb => {
@@ -337,17 +360,41 @@ class WheelOfFood {
                 e.target.parentElement.classList.add('selected');
             });
         });
+
+        // 為編輯餐點彈窗的價格選擇器添加事件監聽
+        const editPriceOptions = this.editItemModal.querySelectorAll('input[name="edit-price"]');
+        editPriceOptions.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const priceOptions = this.editItemModal.querySelectorAll('.price-option');
+                priceOptions.forEach(option => option.classList.remove('selected'));
+                e.target.parentElement.classList.add('selected');
+            });
+        });
+        
+        // 為編輯餐點彈窗的好吃程度選擇器添加事件監聽
+        const editTasteOptions = this.editItemModal.querySelectorAll('input[name="edit-taste"]');
+        editTasteOptions.forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const tasteOptions = this.editItemModal.querySelectorAll('.taste-option');
+                tasteOptions.forEach(option => option.classList.remove('selected'));
+                e.target.parentElement.classList.add('selected');
+            });
+        });
     }
 
-    addItemFromModal() {
+    async addItemFromModal() {
         const name = this.modalItemName.value.trim();
+        const imageUrl = this.modalItemImage.value.trim();
         const selectedTags = [];
         
-        // 收集選中的標籤
+        // 收集選中的標籤名稱
         const checkboxes = this.modalTagsCheckboxes.querySelectorAll('input[type="checkbox"]:checked');
         checkboxes.forEach(cb => {
-            selectedTags.push(cb.value);
+            selectedTags.push(cb.value); // 這裡是標籤名稱
         });
+        
+        // 轉換為 UUID
+        const selectedTagIds = selectedTags.map(tagName => this.tagNameToId.get(tagName)).filter(id => id);
         
         // 收集選中的價格和好吃程度
         const selectedPriceRadio = this.addItemModal.querySelector('input[name="modal-price"]:checked');
@@ -360,7 +407,7 @@ class WheelOfFood {
             return;
         }
         
-        if (selectedTags.length === 0) {
+        if (selectedTagIds.length === 0) {
             alert('請至少選擇一個標籤！');
             return;
         }
@@ -371,22 +418,60 @@ class WheelOfFood {
             return;
         }
         
-        this.items.push({ name, tags: selectedTags, price: selectedPrice, taste: selectedTaste, dateAdded: Date.now() });
-        
-        this.updateWheel();
-        this.updateItemsList();
-        this.saveData();
-        this.hideAddItemModal();
-    }
-    
-    deleteItem(index) {
-        if (confirm(`確定要刪除 "${this.items[index].name}" 嗎？`)) {
-            this.items.splice(index, 1);
-            this.updateWheel();
-            this.updateItemsList();
-            this.saveData();
+        try {
+            // 轉換價格格式
+            let priceValue;
+            switch(selectedPrice) {
+                case '$': priceValue = 'low'; break;
+                case '$$': priceValue = 'medium'; break;
+                case '$$$': priceValue = 'high'; break;
+                default: priceValue = 'low';
+            }
+            
+            // 轉換好吃程度
+            let tasteValue;
+            switch(selectedTaste) {
+                case '🩷': tasteValue = 1; break;
+                case '🩷🩷': tasteValue = 2; break;
+                case '🩷🩷🩷': tasteValue = 3; break;
+                default: tasteValue = 1;
+            }
+
+            const foodData = {
+                payload: {
+                    foodname: name,
+                    imgurl: imageUrl || null,
+                    price: priceValue,
+                    taste: tasteValue
+                },
+                tag_ids: selectedTagIds
+            };
+
+            const response = await fetch(`${this.supabaseUrl}/rest/v1/food`, {
+                method: 'POST',
+                headers: {
+                    'apikey': this.supabaseKey,
+                    'Authorization': `Bearer ${this.supabaseKey}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(foodData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // 重新載入數據
+            await this.loadFromSupabase();
+            this.hideAddItemModal();
+
+        } catch (error) {
+            console.error('新增餐點失敗:', error);
+            alert('新增餐點失敗，請稍後再試');
         }
     }
+    
     
     getSortedItems() {
         const sortedItems = [...this.items];
@@ -412,10 +497,10 @@ class WheelOfFood {
                     comparison = priceA - priceB;
                     break;
                 case 'taste':
-                    // 好吃程度排序：ok < 好吃 < 讚
-                    const tasteOrder = { 'ok': 1, '好吃': 2, '讚': 3 };
-                    const tasteA = tasteOrder[a.taste || 'ok'] || 1;
-                    const tasteB = tasteOrder[b.taste || 'ok'] || 1;
+                    // 好吃程度排序：🩷 < 🩷🩷 < 🩷🩷🩷
+                    const tasteOrder = { '🩷': 1, '🩷🩷': 2, '🩷🩷🩷': 3 };
+                    const tasteA = tasteOrder[a.taste || '🩷'] || 1;
+                    const tasteB = tasteOrder[b.taste || '🩷'] || 1;
                     comparison = tasteA - tasteB;
                     break;
                 default:
@@ -450,25 +535,22 @@ class WheelOfFood {
             const itemCard = document.createElement('div');
             itemCard.className = 'item-card';
             
-            // 創建標籤顯示
-            const tagsHtml = item.tags ? item.tags.map(tag => 
-                `<span class="item-tag">${tag}</span>`
-            ).join('') : '';
+            const imageHtml = item.imageUrl ? 
+                `<div class="item-image">
+                    <img src="${item.imageUrl}" alt="${item.name}" onerror="this.parentElement.style.display='none'">
+                </div>` : '';
             
             itemCard.innerHTML = `
+                ${imageHtml}
                 <div class="item-info">
-                    <div class="item-header">
-                        <div class="item-name">
-                            ${item.name}
-                            <span class="item-price">${item.price || '$'}</span>
-                            <span class="item-taste">${item.taste || 'ok'}</span>
-                        </div>
-                        <div class="item-mini-actions">
-                            <button class="mini-btn edit" onclick="wheel.editItemTags(${index}, ${originalIndex})" title="編輯標籤">✏️</button>
-                            <button class="mini-btn delete" onclick="wheel.deleteItem(${originalIndex})" title="刪除">🗑️</button>
-                        </div>
+                    <div class="item-badges">
+                        <span class="item-price">${item.price || '$'}</span>
+                        <span class="item-taste">${item.taste || 'ok'}</span>
                     </div>
-                    <div class="item-tags">${tagsHtml}</div>
+                    <div class="item-name-center">${item.name}</div>
+                    <div class="item-mini-actions">
+                        <button class="mini-btn edit" onclick="wheel.showEditItemModal(${originalIndex})" title="編輯餐點">✏️</button>
+                    </div>
                 </div>
             `;
             
@@ -478,7 +560,7 @@ class WheelOfFood {
     
     addNewItemCard() {
         const addCard = document.createElement('div');
-        addCard.className = 'item-card add-item-card';
+        addCard.className = 'add-item-card';
         addCard.innerHTML = `
             <div class="add-item-content">
                 <div class="add-item-icon">+</div>
@@ -491,95 +573,62 @@ class WheelOfFood {
         this.itemsList.appendChild(addCard);
     }
     
-    editItemTags(displayIndex, originalIndex) {
-        // 禁用所有其他項目的編輯和刪除按鈕（跳過第一個「+」卡片）
-        this.disableOtherItemButtons(displayIndex + 1);
+    showEditItemModal(itemIndex) {
+        this.currentEditingIndex = itemIndex;
+        const item = this.items[itemIndex];
         
-        const itemCard = this.itemsList.children[displayIndex + 1];
-        const itemInfo = itemCard.querySelector('.item-info');
-        const tagsDiv = itemInfo.querySelector('.item-tags');
-        const actions = itemCard.querySelector('div[style*="display: flex"]');
+        // 填入當前資料
+        this.editItemName.value = item.name;
+        this.editItemImage.value = item.imageUrl || '';
         
-        // 創建標籤編輯器
-        const tagEditor = document.createElement('div');
-        tagEditor.className = 'tag-editor';
-        
-        // 添加價格選擇器
-        const priceSelector = document.createElement('div');
-        priceSelector.className = 'price-selector';
-        priceSelector.innerHTML = `
-            <label>價格等級：</label>
-            <div class="price-options">
-                <label class="price-option ${this.items[originalIndex].price === '$' ? 'selected' : ''}">
-                    <input type="radio" name="price-${displayIndex}" value="$" ${this.items[originalIndex].price === '$' ? 'checked' : ''}>
-                    $
-                </label>
-                <label class="price-option ${this.items[originalIndex].price === '$$' ? 'selected' : ''}">
-                    <input type="radio" name="price-${displayIndex}" value="$$" ${this.items[originalIndex].price === '$$' ? 'checked' : ''}>
-                    $$
-                </label>
-                <label class="price-option ${this.items[originalIndex].price === '$$$' ? 'selected' : ''}">
-                    <input type="radio" name="price-${displayIndex}" value="$$$" ${this.items[originalIndex].price === '$$$' ? 'checked' : ''}>
-                    $$$
-                </label>
-            </div>
-        `;
-        
-        // 為價格選項添加事件監聽器
-        priceSelector.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                // 移除所有選中狀態
-                priceSelector.querySelectorAll('.price-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                // 添加選中狀態到當前選項
-                e.target.parentElement.classList.add('selected');
-            });
+        // 設定價格選項
+        const editPriceOptions = this.editItemModal.querySelectorAll('input[name="edit-price"]');
+        editPriceOptions.forEach(radio => {
+            radio.checked = radio.value === item.price;
+            if (radio.checked) {
+                radio.parentElement.classList.add('selected');
+            } else {
+                radio.parentElement.classList.remove('selected');
+            }
         });
         
-        tagEditor.appendChild(priceSelector);
-        
-        // 添加好吃程度選擇器
-        const tasteSelector = document.createElement('div');
-        tasteSelector.className = 'taste-selector';
-        tasteSelector.innerHTML = `
-            <label>好吃程度：</label>
-            <div class="taste-options">
-                <label class="taste-option ${this.items[originalIndex].taste === 'ok' ? 'selected' : ''}">
-                    <input type="radio" name="taste-${displayIndex}" value="ok" ${this.items[originalIndex].taste === 'ok' ? 'checked' : ''}>
-                    ok
-                </label>
-                <label class="taste-option ${this.items[originalIndex].taste === '好吃' ? 'selected' : ''}">
-                    <input type="radio" name="taste-${displayIndex}" value="好吃" ${this.items[originalIndex].taste === '好吃' ? 'checked' : ''}>
-                    好吃
-                </label>
-                <label class="taste-option ${this.items[originalIndex].taste === '讚' ? 'selected' : ''}">
-                    <input type="radio" name="taste-${displayIndex}" value="讚" ${this.items[originalIndex].taste === '讚' ? 'checked' : ''}>
-                    讚
-                </label>
-            </div>
-        `;
-        
-        // 為好吃程度選項添加事件監聽器
-        tasteSelector.querySelectorAll('input[type="radio"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                // 移除所有選中狀態
-                tasteSelector.querySelectorAll('.taste-option').forEach(option => {
-                    option.classList.remove('selected');
-                });
-                // 添加選中狀態到當前選項
-                e.target.parentElement.classList.add('selected');
-            });
+        // 設定好吃程度選項
+        const editTasteOptions = this.editItemModal.querySelectorAll('input[name="edit-taste"]');
+        editTasteOptions.forEach(radio => {
+            radio.checked = radio.value === item.taste;
+            if (radio.checked) {
+                radio.parentElement.classList.add('selected');
+            } else {
+                radio.parentElement.classList.remove('selected');
+            }
         });
         
-        tagEditor.appendChild(tasteSelector);
+        // 更新標籤選項
+        this.updateEditTagsCheckboxes(item.tags);
+        
+        // 顯示彈窗
+        this.editItemModal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+        setTimeout(() => {
+            this.editItemName.focus();
+        }, 300);
+    }
+    
+    hideEditItemModal() {
+        this.editItemModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        this.currentEditingIndex = -1;
+    }
+    
+    updateEditTagsCheckboxes(selectedTags = []) {
+        this.editTagsCheckboxes.innerHTML = '';
         
         this.categories.forEach(category => {
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.value = category;
-            checkbox.id = `edit-tag-${displayIndex}-${category}`;
-            checkbox.checked = this.items[originalIndex].tags && this.items[originalIndex].tags.includes(category);
+            checkbox.id = `edit-tag-${category}`;
+            checkbox.checked = selectedTags.includes(category);
             
             const label = document.createElement('label');
             label.htmlFor = checkbox.id;
@@ -598,7 +647,7 @@ class WheelOfFood {
             });
             
             label.appendChild(checkbox);
-            tagEditor.appendChild(label);
+            this.editTagsCheckboxes.appendChild(label);
         });
         
         // 添加管理分類的「+」按鈕
@@ -609,95 +658,146 @@ class WheelOfFood {
         addLabel.style.cursor = 'pointer';
         addLabel.addEventListener('click', () => {
             this.showCategoryModal();
-            // 當分類管理彈窗關閉後，更新編輯器的標籤選項
+            // 當分類管理彈窗關閉後，更新編輯餐點彈窗的標籤選項
             const originalHideCategoryModal = this.hideCategoryModal.bind(this);
             this.hideCategoryModal = () => {
                 originalHideCategoryModal();
-                // 重新建立編輯器以包含新的標籤
-                this.editItemTags(displayIndex, originalIndex);
+                // 重新更新編輯餐點彈窗的標籤選項
+                if (this.currentEditingIndex >= 0) {
+                    this.updateEditTagsCheckboxes(this.items[this.currentEditingIndex].tags);
+                }
                 // 恢復原本的 hideCategoryModal 方法
                 this.hideCategoryModal = originalHideCategoryModal;
             };
         });
         
-        tagEditor.appendChild(addLabel);
-        
-        // 替換標籤顯示為編輯器
-        tagsDiv.style.display = 'none';
-        itemInfo.appendChild(tagEditor);
-        
-        // 隱藏原有按鈕，添加編輯按鈕
-        const miniActions = itemCard.querySelector('.item-mini-actions');
-        miniActions.innerHTML = `
-            <button class="mini-btn save" onclick="wheel.saveItemTags(${displayIndex}, ${originalIndex})" title="保存">✅</button>
-            <button class="mini-btn cancel" onclick="wheel.cancelEditItemTags(${displayIndex})" title="取消">❌</button>
-        `;
+        this.editTagsCheckboxes.appendChild(addLabel);
     }
     
-    saveItemTags(displayIndex, originalIndex) {
-        const itemCard = this.itemsList.children[displayIndex];
-        const tagEditor = itemCard.querySelector('.tag-editor');
-        const checkedBoxes = tagEditor.querySelectorAll('input[type="checkbox"]:checked');
-        const selectedPriceRadio = tagEditor.querySelector('input[name^="price-"]:checked');
-        const selectedTasteRadio = tagEditor.querySelector('input[name^="taste-"]:checked');
+    async saveEditItemFromModal() {
+        const name = this.editItemName.value.trim();
+        const imageUrl = this.editItemImage.value.trim();
+        const selectedTags = [];
         
-        const selectedTags = Array.from(checkedBoxes).map(cb => cb.value);
+        // 收集選中的標籤名稱
+        const checkboxes = this.editTagsCheckboxes.querySelectorAll('input[type="checkbox"]:checked');
+        checkboxes.forEach(cb => {
+            selectedTags.push(cb.value); // 這裡是標籤名稱
+        });
+        
+        // 轉換為 UUID
+        const selectedTagIds = selectedTags.map(tagName => this.tagNameToId.get(tagName)).filter(id => id);
+        
+        // 收集選中的價格和好吃程度
+        const selectedPriceRadio = this.editItemModal.querySelector('input[name="edit-price"]:checked');
+        const selectedTasteRadio = this.editItemModal.querySelector('input[name="edit-taste"]:checked');
         const selectedPrice = selectedPriceRadio ? selectedPriceRadio.value : '$';
         const selectedTaste = selectedTasteRadio ? selectedTasteRadio.value : 'ok';
+        
+        if (!name) {
+            alert('請輸入餐點名稱！');
+            return;
+        }
         
         if (selectedTags.length === 0) {
             alert('請至少選擇一個標籤！');
             return;
         }
         
-        this.items[originalIndex].tags = selectedTags;
-        this.items[originalIndex].price = selectedPrice;
-        this.items[originalIndex].taste = selectedTaste;
-        this.enableAllItemButtons(); // 恢復所有按鈕
-        this.updateWheel();
-        this.updateItemsList();
-        this.saveData();
-    }
-    
-    cancelEditItemTags(index) {
-        this.enableAllItemButtons(); // 恢復所有按鈕
-        this.updateItemsList(); // 重新渲染列表以取消編輯
-    }
-    
-    disableOtherItemButtons(editingIndex) {
-        // 禁用所有其他項目的編輯和刪除按鈕（跳過第一個「+」卡片）
-        Array.from(this.itemsList.children).forEach((itemCard, index) => {
-            if (index !== editingIndex && index > 0) { // 跳過第一個「+」卡片
-                const buttons = itemCard.querySelectorAll('.mini-btn');
-                buttons.forEach(btn => {
-                    btn.disabled = true;
-                    btn.style.opacity = '0.5';
-                    btn.style.cursor = 'not-allowed';
-                    btn.title = '請先完成其他項目的編輯';
-                });
+        // 檢查是否已存在（排除自己）
+        if (this.items.some((item, index) => item.name === name && index !== this.currentEditingIndex)) {
+            alert('這個餐點名稱已經存在了！');
+            return;
+        }
+        
+        try {
+            const currentItem = this.items[this.currentEditingIndex];
+            
+            // 轉換價格格式
+            let priceValue;
+            switch(selectedPrice) {
+                case '$': priceValue = 'low'; break;
+                case '$$': priceValue = 'medium'; break;
+                case '$$$': priceValue = 'high'; break;
+                default: priceValue = 'low';
             }
-        });
+            
+            // 轉換好吃程度
+            let tasteValue;
+            switch(selectedTaste) {
+                case '🩷': tasteValue = 1; break;
+                case '🩷🩷': tasteValue = 2; break;
+                case '🩷🩷🩷': tasteValue = 3; break;
+                default: tasteValue = 1;
+            }
+
+            const foodData = {
+                payload: {
+                    foodname: name,
+                    imgurl: imageUrl || null,
+                    price: priceValue,
+                    taste: tasteValue
+                },
+                tag_ids: selectedTagIds
+            };
+
+            const response = await fetch(`${this.supabaseUrl}/rest/v1/food?id=eq.${currentItem.id}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': this.supabaseKey,
+                    'Authorization': `Bearer ${this.supabaseKey}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(foodData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // 重新載入數據
+            await this.loadFromSupabase();
+            this.hideEditItemModal();
+
+        } catch (error) {
+            console.error('更新餐點失敗:', error);
+            alert('更新餐點失敗，請稍後再試');
+        }
     }
     
-    enableAllItemButtons() {
-        // 恢復所有項目的編輯和刪除按鈕（跳過第一個「+」卡片）
-        Array.from(this.itemsList.children).forEach((itemCard, index) => {
-            if (index > 0) { // 跳過第一個「+」卡片
-                const buttons = itemCard.querySelectorAll('.mini-btn');
-                buttons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.style.opacity = '';
-                    btn.style.cursor = '';
-                    // 恢復原本的 title
-                    if (btn.classList.contains('edit')) {
-                        btn.title = '編輯標籤';
-                    } else if (btn.classList.contains('delete')) {
-                        btn.title = '刪除';
+    async deleteItemFromModal() {
+        if (this.currentEditingIndex >= 0) {
+            const currentItem = this.items[this.currentEditingIndex];
+            const itemName = currentItem.name;
+            
+            if (confirm(`確定要刪除 "${itemName}" 嗎？`)) {
+                try {
+                    const response = await fetch(`${this.supabaseUrl}/rest/v1/food?id=eq.${currentItem.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': this.supabaseKey,
+                            'Authorization': `Bearer ${this.supabaseKey}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                });
+
+                    // 重新載入數據
+                    await this.loadFromSupabase();
+                    this.hideEditItemModal();
+
+                } catch (error) {
+                    console.error('刪除餐點失敗:', error);
+                    alert('刪除餐點失敗，請稍後再試');
+                }
             }
-        });
+        }
     }
+    
     
     // 分類管理方法
     updateCategoryButtons() {
@@ -796,7 +896,7 @@ class WheelOfFood {
         this.newCategoryName.value = '';
     }
     
-    addCategory() {
+    async addCategory() {
         const name = this.newCategoryName.value.trim();
         
         if (!name) {
@@ -809,14 +909,40 @@ class WheelOfFood {
             return;
         }
         
-        this.categories.push(name);
-        this.newCategoryName.value = '';
-        
-        this.updateCategoryButtons();
-        this.updateModalTagsCheckboxes();
-        this.updateCategoriesManagementList();
-        this.updateItemsList();
-        this.saveData();
+        try {
+            const tagData = {
+                name: name,
+                food_ids: []
+            };
+
+            const response = await fetch(`${this.supabaseUrl}/rest/v1/tag`, {
+                method: 'POST',
+                headers: {
+                    'apikey': this.supabaseKey,
+                    'Authorization': `Bearer ${this.supabaseKey}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                body: JSON.stringify(tagData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            this.newCategoryName.value = '';
+            
+            // 重新載入標籤
+            await this.loadTagsFromSupabase();
+            this.updateCategoryButtons();
+            this.updateModalTagsCheckboxes();
+            this.updateCategoriesManagementList();
+            this.updateItemsList();
+
+        } catch (error) {
+            console.error('新增標籤失敗:', error);
+            alert('新增標籤失敗，請稍後再試');
+        }
     }
     
     editCategory(index, newName) {
@@ -851,45 +977,45 @@ class WheelOfFood {
         return true;
     }
     
-    deleteCategory(index) {
+    async deleteCategory(index) {
         const categoryName = this.categories[index];
+        const tagId = this.tagNameToId.get(categoryName);
         const itemsWithTag = this.items.filter(item => item.tags && item.tags.includes(categoryName));
         
         if (itemsWithTag.length > 0) {
-            const confirmMessage = `標籤 "${categoryName}" 還在 ${itemsWithTag.length} 個餐點中使用。\n確定要刪除這個標籤嗎？`;
+            const confirmMessage = `標籤 "${categoryName}" 還在 ${itemsWithTag.length} 個餐點中使用。\n確定要刪除這個標籤嗎？觸發器會自動從所有餐點中移除此標籤。`;
             if (!confirm(confirmMessage)) {
                 return;
             }
-            
-            // 從所有使用此標籤的餐點中移除
-            this.items.forEach(item => {
-                if (item.tags && item.tags.includes(categoryName)) {
-                    item.tags = item.tags.filter(tag => tag !== categoryName);
-                    // 如果餐點沒有任何標籤了，加上"其他"標籤
-                    if (item.tags.length === 0) {
-                        item.tags = ['其他'];
-                    }
-                }
-            });
         } else {
             if (!confirm(`確定要刪除標籤 "${categoryName}" 嗎？`)) {
                 return;
             }
         }
         
-        this.categories.splice(index, 1);
-        
-        // 確保至少有一個"其他"分類
-        if (!this.categories.includes('其他')) {
-            this.categories.push('其他');
+        try {
+            if (tagId) {
+                const response = await fetch(`${this.supabaseUrl}/rest/v1/tag?id=eq.${tagId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'apikey': this.supabaseKey,
+                        'Authorization': `Bearer ${this.supabaseKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // 重新載入數據
+                await this.loadFromSupabase();
+                this.updateCategoriesManagementList();
+            }
+        } catch (error) {
+            console.error('刪除標籤失敗:', error);
+            alert('刪除標籤失敗，請稍後再試');
         }
-        
-        this.updateCategoryButtons();
-        this.updateModalTagsCheckboxes();
-        this.updateCategoriesManagementList();
-        this.updateWheel();
-        this.updateItemsList();
-        this.saveData();
     }
     
     updateCategoriesManagementList() {
@@ -966,6 +1092,118 @@ class WheelOfFood {
         this.result.textContent = '';
     }
     
+    async loadFromSupabase() {
+        try {
+            const response = await fetch(`${this.supabaseUrl}/rest/v1/food?select=*`, {
+                method: 'GET',
+                headers: {
+                    'apikey': this.supabaseKey,
+                    'Authorization': `Bearer ${this.supabaseKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            
+            this.items = data.map(food => {
+                const payload = food.payload;
+                const tagIds = food.tag_ids || [];
+                
+                // 將價格格式轉換
+                let priceDisplay;
+                switch(payload.price) {
+                    case 'low': priceDisplay = '$'; break;
+                    case 'medium': priceDisplay = '$$'; break;
+                    case 'high': priceDisplay = '$$$'; break;
+                    default: priceDisplay = '$';
+                }
+                
+                // 將好吃程度轉換為皇冠
+                let tasteDisplay;
+                switch(payload.taste) {
+                    case 1: tasteDisplay = '🩷'; break;
+                    case 2: tasteDisplay = '🩷🩷'; break;
+                    case 3: tasteDisplay = '🩷🩷🩷'; break;
+                    default: tasteDisplay = '🩷';
+                }
+                
+                // 將 UUID 轉換為標籤名稱 (用於顯示和過濾)
+                const tagNames = tagIds.map(tagId => this.tagIdToName.get(tagId) || tagId);
+                
+                return {
+                    id: food.id,
+                    name: payload.foodname || '未命名',
+                    imageUrl: payload.imgurl,
+                    price: priceDisplay,
+                    taste: tasteDisplay,
+                    tags: tagNames,
+                    tagIds: tagIds, // 保留原始 UUID 供 API 使用
+                    dateAdded: new Date(food.created_at).getTime()
+                };
+            });
+
+            await this.loadTagsFromSupabase();
+            
+            this.updateCategoryButtons();
+            this.updateModalTagsCheckboxes();
+            this.setupPriceSelectors();
+            this.updateWheel();
+            this.updateItemsList();
+
+        } catch (error) {
+            console.error('載入 Supabase 資料失敗:', error);
+            this.items = [];
+            this.categories = [];
+            this.updateCategoryButtons();
+            this.updateModalTagsCheckboxes();
+            this.setupPriceSelectors();
+            this.updateWheel();
+            this.updateItemsList();
+        }
+    }
+
+    async loadTagsFromSupabase() {
+        try {
+            const response = await fetch(`${this.supabaseUrl}/rest/v1/tag?select=*`, {
+                method: 'GET',
+                headers: {
+                    'apikey': this.supabaseKey,
+                    'Authorization': `Bearer ${this.supabaseKey}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const tags = await response.json();
+            
+            // 清空現有映射
+            this.tagNameToId.clear();
+            this.tagIdToName.clear();
+            this.tagData.clear();
+            
+            // 建立雙向映射
+            tags.forEach(tag => {
+                this.tagNameToId.set(tag.name, tag.id);
+                this.tagIdToName.set(tag.id, tag.name);
+                this.tagData.set(tag.id, tag);
+            });
+            
+            // UI 顯示用的分類名稱
+            this.categories = tags.map(tag => tag.name);
+            
+        } catch (error) {
+            console.error('載入標籤失敗:', error);
+            this.categories = [];
+        }
+    }
+
     saveData() {
         localStorage.setItem('wheelOfFoodItems', JSON.stringify(this.items));
         localStorage.setItem('wheelOfFoodCategories', JSON.stringify(this.categories));
@@ -977,25 +1215,20 @@ class WheelOfFood {
         
         if (savedItems) {
             this.items = JSON.parse(savedItems);
-            // 遷移舊資料格式：將 category 轉換為 tags
             this.items.forEach((item, index) => {
                 if (item.category && !item.tags) {
                     item.tags = [item.category];
                     delete item.category;
                 }
-                // 確保每個餐點都有 tags 陣列
                 if (!item.tags) {
                     item.tags = ['其他'];
                 }
-                // 確保每個餐點都有價格
                 if (!item.price) {
                     item.price = '$';
                 }
-                // 確保每個餐點都有好吃程度
                 if (!item.taste) {
-                    item.taste = 'ok';
+                    item.taste = '🩷';
                 }
-                // 為沒有時間戳的舊資料添加時間戳
                 if (!item.dateAdded) {
                     item.dateAdded = Date.now() - (this.items.length - index) * 100000;
                 }
@@ -1006,9 +1239,18 @@ class WheelOfFood {
             this.categories = JSON.parse(savedCategories);
         }
         
-        // 確保有基本標籤
-        if (!this.categories.includes('熱食')) {
-            this.categories.push('熱食');
+    }
+}
+
+// 清理舊的預設資料（一次性清理）
+if (localStorage.getItem('wheelOfFoodCategories')) {
+    const savedCategories = JSON.parse(localStorage.getItem('wheelOfFoodCategories'));
+    const filteredCategories = savedCategories.filter(cat => cat !== '熱食' && cat !== '其他');
+    if (filteredCategories.length !== savedCategories.length) {
+        if (filteredCategories.length === 0) {
+            localStorage.removeItem('wheelOfFoodCategories');
+        } else {
+            localStorage.setItem('wheelOfFoodCategories', JSON.stringify(filteredCategories));
         }
     }
 }

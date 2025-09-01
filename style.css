@@ -297,11 +297,15 @@ h1 {
 .add-item-card {
     background: #f7fafc;
     border: 2px dashed #a0aec0;
+    border-radius: 12px;
+    padding: 10px;
     cursor: pointer;
     transition: all 0.3s;
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 90px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .add-item-card:hover {
@@ -378,10 +382,9 @@ h1 {
 }
 
 .item-card {
-    background: #f7fafc;
+    background: #7c9fb3;
     border-radius: 12px;
     padding: 10px;
-    border-left: 4px solid #7c9fb3;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: all 0.3s;
     display: flex;
@@ -397,29 +400,45 @@ h1 {
 
 .item-info {
     flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
-.item-header {
+.item-badges {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    gap: 4px;
+    z-index: 2;
+}
+
+.item-name-center {
+    font-family: 'Comic Sans MS', 'Microsoft JhengHei', '微軟正黑體', cursive, sans-serif;
+    font-weight: bold;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    flex: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-}
-
-.item-name {
-    font-weight: bold;
-    color: #2d3748;
-    font-size: 16px;
-    flex: 1;
+    justify-content: center;
+    padding: 8px;
 }
 
 .item-mini-actions {
+    position: absolute;
+    top: 0;
+    right: 0;
     display: flex;
     gap: 4px;
+    z-index: 2;
 }
 
 .mini-btn {
-    background: #e2e8f0;
+    background: white;
     color: #4a5568;
     border: none;
     padding: 3px;
@@ -432,6 +451,7 @@ h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .mini-btn:hover {
@@ -450,13 +470,8 @@ h1 {
     box-shadow: none;
 }
 
-.mini-btn.edit {
-    background: #7c9fb3;
-    color: white;
-}
-
 .mini-btn.edit:hover {
-    background: #6b8a9e;
+    background: #f7fafc;
 }
 
 .mini-btn.delete {
@@ -484,6 +499,27 @@ h1 {
 
 .mini-btn.cancel:hover {
     background: #718096;
+}
+
+.item-image {
+    width: 100%;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.item-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
 }
 
 .delete-btn {
@@ -633,21 +669,24 @@ h1 {
 }
 
 .item-price {
-    color: #7c9fb3;
+    background: white;
+    color: #4a5568;
     font-weight: bold;
-    margin-left: 8px;
-    font-size: 0.9em;
+    font-size: 0.75em;
+    padding: 2px 6px;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
 .item-taste {
+    background: white;
     color: #4a5568;
     font-weight: bold;
-    margin-left: 6px;
-    font-size: 0.85em;
-    background: #f7fafc;
+    font-size: 0.8em;
     padding: 2px 6px;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    line-height: 1.2;
 }
 
 .price-selection, .price-selector, .taste-selection, .taste-selector {

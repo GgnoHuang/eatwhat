@@ -1,1 +1,23 @@
+# 環境變數文件
+.env.local
+.env
+.env.production
+
+# 依賴項目
 node_modules/
+
+# 日誌文件
+*.log
+npm-debug.log*
+
+# 系統文件
+.DS_Store
+Thumbs.db
+
+# IDE 文件
+.vscode/
+.idea/
+
+# 臨時文件
+*.tmp
+*.temp

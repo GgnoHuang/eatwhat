@@ -59,6 +59,9 @@
                     <div class="item-input">
                         <input type="text" id="modalItemName" placeholder="輸入餐點名稱">
                     </div>
+                    <div class="item-input">
+                        <input type="url" id="modalItemImage" placeholder="輸入圖片網址（選填）">
+                    </div>
                     <div class="price-selection">
                         <label>價格等級：</label>
                         <div class="price-options">
@@ -77,19 +80,19 @@
                         </div>
                     </div>
                     <div class="taste-selection">
-                        <label>好吃程度：</label>
+                        <label>好吃度：</label>
                         <div class="taste-options">
                             <label class="taste-option selected">
-                                <input type="radio" name="modal-taste" value="ok" checked>
-                                ok
+                                <input type="radio" name="modal-taste" value="🩷" checked>
+                                🩷
                             </label>
                             <label class="taste-option">
-                                <input type="radio" name="modal-taste" value="好吃">
-                                好吃
+                                <input type="radio" name="modal-taste" value="🩷🩷">
+                                🩷🩷
                             </label>
                             <label class="taste-option">
-                                <input type="radio" name="modal-taste" value="讚">
-                                讚
+                                <input type="radio" name="modal-taste" value="🩷🩷🩷">
+                                🩷🩷🩷
                             </label>
                         </div>
                     </div>
@@ -104,6 +107,66 @@
             </div>
         </div>
 
+        <!-- 編輯餐點彈窗 -->
+        <div class="modal-overlay" id="editItemModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>編輯餐點</h3>
+                    <button class="modal-close" id="closeEditItemBtn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="item-input">
+                        <input type="text" id="editItemName" placeholder="輸入餐點名稱">
+                    </div>
+                    <div class="item-input">
+                        <input type="url" id="editItemImage" placeholder="輸入圖片網址（選填）">
+                    </div>
+                    <div class="price-selection">
+                        <label>價格等級：</label>
+                        <div class="price-options">
+                            <label class="price-option">
+                                <input type="radio" name="edit-price" value="$">
+                                $
+                            </label>
+                            <label class="price-option">
+                                <input type="radio" name="edit-price" value="$$">
+                                $$
+                            </label>
+                            <label class="price-option">
+                                <input type="radio" name="edit-price" value="$$$">
+                                $$$
+                            </label>
+                        </div>
+                    </div>
+                    <div class="taste-selection">
+                        <label>好吃程度：</label>
+                        <div class="taste-options">
+                            <label class="taste-option">
+                                <input type="radio" name="edit-taste" value="🩷">
+                                🩷
+                            </label>
+                            <label class="taste-option">
+                                <input type="radio" name="edit-taste" value="🩷🩷">
+                                🩷🩷
+                            </label>
+                            <label class="taste-option">
+                                <input type="radio" name="edit-taste" value="🩷🩷🩷">
+                                🩷🩷🩷
+                            </label>
+                        </div>
+                    </div>
+                    <div class="tags-selection">
+                        <label>選擇標籤：</label>
+                        <div id="editTagsCheckboxes" class="tags-checkboxes"></div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="editDeleteBtn" class="delete-btn">刪除餐點</button>
+                        <button id="editSaveBtn" class="primary-btn">保存修改</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 餐點列表 -->
         <div class="items-list">
             <div class="list-header">
@@ -111,11 +174,9 @@
                 <div class="sort-controls">
                     <label for="sortBy">排序：</label>
                     <select id="sortBy">
-                        <option value="name">名稱</option>
                         <option value="date">新增時間</option>
-                        <option value="tags">標籤數量</option>
                         <option value="price">價格</option>
-                        <option value="taste">好吃程度</option>
+                        <option value="taste">好吃度</option>
                     </select>
                     <button id="sortOrder" class="sort-order-btn" data-order="asc">↑</button>
                 </div>
@@ -124,6 +185,7 @@
         </div>
     </div>
 
+    <script src="env.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
