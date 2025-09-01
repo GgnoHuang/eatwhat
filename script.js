@@ -52,6 +52,10 @@ class WheelOfFood {
         this.categoriesList = document.getElementById('categoriesList');
         this.closeCategoryManagementBtn = document.getElementById('closeCategoryManagementBtn');
         this.currentEditingIndex = -1;
+        
+        // 性能優化相關
+        this.loadingElement = null;
+        this.debounceTimeout = null;
     }
     
     bindEvents() {
@@ -419,6 +423,9 @@ class WheelOfFood {
         }
         
         try {
+            // 顯示加載指示器
+            this.showLoading(true);
+            
             // 轉換價格格式
             let priceValue;
             switch(selectedPrice) {
@@ -469,6 +476,8 @@ class WheelOfFood {
         } catch (error) {
             console.error('新增餐點失敗:', error);
             alert('新增餐點失敗，請稍後再試');
+        } finally {
+            this.showLoading(false);
         }
     }
     
@@ -1077,6 +1086,34 @@ class WheelOfFood {
         `;
     }
     
+    // 性能優化方法
+    showLoading(show) {
+        if (show) {
+            if (!this.loadingElement) {
+                this.loadingElement = document.createElement('div');
+                this.loadingElement.className = 'loading-overlay';
+                this.loadingElement.innerHTML = `
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>載入中...</p>
+                    </div>
+                `;
+                document.body.appendChild(this.loadingElement);
+            }
+            this.loadingElement.style.display = 'flex';
+        } else {
+            if (this.loadingElement) {
+                this.loadingElement.style.display = 'none';
+            }
+        }
+    }
+    
+    // 防抖函數
+    debounce(func, wait) {
+        clearTimeout(this.debounceTimeout);
+        this.debounceTimeout = setTimeout(func, wait);
+    }
+    
     filterCategory(category) {
         this.currentCategory = category;
         
@@ -1093,6 +1130,9 @@ class WheelOfFood {
     }
     
     async loadFromSupabase() {
+        // 顯示加載指示器
+        this.showLoading(true);
+        
         try {
             const response = await fetch(`${this.supabaseUrl}/rest/v1/food?select=*`, {
                 method: 'GET',
@@ -1163,6 +1203,9 @@ class WheelOfFood {
             this.setupPriceSelectors();
             this.updateWheel();
             this.updateItemsList();
+        } finally {
+            // 隱藏加載指示器
+            this.showLoading(false);
         }
     }
 
