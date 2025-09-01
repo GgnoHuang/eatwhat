@@ -130,7 +130,7 @@ export default function WheelSpinner({ items }: Props) {
                               y="0"
                               textAnchor="middle"
                               dominantBaseline="middle"
-                              fill="yellow"
+                              fill="#FACC15"
                               fontSize="30"
                               fontWeight="bold"
                               style={{
@@ -154,7 +154,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="-10"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="26"
                                 fontWeight="bold"
                                 style={{
@@ -169,7 +169,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="10"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="26"
                                 fontWeight="bold"
                                 style={{
@@ -195,7 +195,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="-14"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="22"
                                 fontWeight="bold"
                                 style={{
@@ -210,7 +210,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="0"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="22"
                                 fontWeight="bold"
                                 style={{
@@ -225,7 +225,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="14"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="22"
                                 fontWeight="bold"
                                 style={{
@@ -252,7 +252,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="-18"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
@@ -267,7 +267,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="-6"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
@@ -282,7 +282,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="6"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
@@ -297,7 +297,7 @@ export default function WheelSpinner({ items }: Props) {
                                 y="18"
                                 textAnchor="middle"
                                 dominantBaseline="middle"
-                                fill="yellow"
+                                fill="#FACC15"
                                 fontSize="20"
                                 fontWeight="bold"
                                 style={{
@@ -334,7 +334,7 @@ export default function WheelSpinner({ items }: Props) {
         className={`mt-6 px-8 py-4 text-lg font-bold text-white rounded-full shadow transition-all ${
           isSpinning 
             ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-blue-500 hover:bg-blue-600 hover:-translate-y-1 hover:scale-105 heartbeat'
+            : 'bg-blue-500 hover:bg-blue-600 hover:-translate-y-1 hover:scale-105 heartbeat cursor-pointer'
         }`}
         style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}
       >

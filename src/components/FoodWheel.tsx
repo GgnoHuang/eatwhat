@@ -20,11 +20,12 @@ export default function FoodWheel() {
     updateFood, 
     deleteFood, 
     addTag, 
+    updateTag,
     deleteTag,
     reload 
   } = useFoodData()
 
-  const [currentCategory, setCurrentCategory] = useState('all')
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['all'])
   const [sortBy, setSortBy] = useState('date')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [showAddModal, setShowAddModal] = useState(false)
@@ -32,10 +33,36 @@ export default function FoodWheel() {
   const [showTagModal, setShowTagModal] = useState(false)
   const [editingItem, setEditingItem] = useState<typeof items[0] | null>(null)
 
-  // 篩選項目
-  const filteredItems = currentCategory === 'all' 
+  // 標籤切換邏輯
+  const handleCategoryToggle = (category: string) => {
+    if (category === 'all') {
+      // 如果點擊"全部"，清空其他選項只保留"全部"
+      setSelectedCategories(['all'])
+    } else {
+      setSelectedCategories(prev => {
+        const newSelected = prev.filter(c => c !== 'all') // 移除"全部"
+        
+        if (newSelected.includes(category)) {
+          // 如果已選中，則取消選中
+          const result = newSelected.filter(c => c !== category)
+          // 如果沒有任何選中項目，則自動選中"全部"
+          return result.length === 0 ? ['all'] : result
+        } else {
+          // 如果未選中，則加入選中
+          return [...newSelected, category]
+        }
+      })
+    }
+  }
+
+  // 複選標籤篩選邏輯
+  const filteredItems = selectedCategories.includes('all')
     ? items 
-    : items.filter(item => item.tags.includes(currentCategory))
+    : items.filter(item => 
+        selectedCategories.some(selectedCategory => 
+          item.tags.includes(selectedCategory)
+        )
+      )
 
   // 排序項目
   const sortedItems = [...filteredItems].sort((a, b) => {
@@ -100,7 +127,7 @@ export default function FoodWheel() {
     <div className="min-h-screen bg-blue-100 p-5">
       <div className="max-w-6xl mx-auto bg-white rounded-3xl p-5 shadow-lg fade-in">
         <h1 className="text-4xl font-bold text-center text-gray-700 mb-5 text-focus-in" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>
-          吃啥？
+          亲，今儿吃点啥？
         </h1>
 
         {error && (
@@ -111,8 +138,8 @@ export default function FoodWheel() {
 
         <CategoryFilter
           categories={['all', ...categories]}
-          currentCategory={currentCategory}
-          onCategoryChange={setCurrentCategory}
+          selectedCategories={selectedCategories}
+          onCategoryToggle={handleCategoryToggle}
           onManageTags={() => setShowTagModal(true)}
         />
 
@@ -158,6 +185,7 @@ export default function FoodWheel() {
           <TagManagementModal
             categories={categories}
             onAddTag={addTag}
+            onUpdateTag={updateTag}
             onDeleteTag={deleteTag}
             onClose={() => setShowTagModal(false)}
           />

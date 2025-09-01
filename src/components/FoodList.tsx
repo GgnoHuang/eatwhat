@@ -41,7 +41,7 @@ export default function FoodList({
           </select>
           <button
             onClick={onSortOrderToggle}
-            className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm font-bold hover:bg-blue-600 hover:scale-110 transition-all"
+            className="px-3 py-1 bg-blue-500 text-white rounded-md text-sm font-bold hover:bg-blue-600 hover:scale-110 transition-all cursor-pointer"
             style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}
           >
             {sortOrder === 'asc' ? '↑' : '↓'}
@@ -115,7 +115,7 @@ export default function FoodList({
             <div className="absolute top-2 right-2 z-10">
               <button
                 onClick={() => onEditFood(item)}
-                className="bg-white bg-opacity-90 text-gray-700 w-6 h-6 rounded text-xs flex items-center justify-center hover:bg-opacity-100 transition-all shadow"
+                className="bg-white bg-opacity-90 text-gray-700 w-6 h-6 rounded text-xs flex items-center justify-center hover:bg-opacity-100 transition-all shadow cursor-pointer"
               >
                 ✏️
               </button>

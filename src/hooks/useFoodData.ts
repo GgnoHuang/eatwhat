@@ -247,6 +247,38 @@ export function useFoodData() {
     }
   }
 
+  const updateTag = async (oldName: string, newName: string) => {
+    setLoading(true)
+    setError(null)
+    
+    try {
+      const tagId = tagNameToId.get(oldName)
+      if (!tagId) return false
+
+      // 檢查新名稱是否已存在
+      if (categories.includes(newName)) {
+        setError('這個標籤名稱已經存在了')
+        return false
+      }
+
+      const { error } = await supabase
+        .from('tag')
+        .update({ name: newName })
+        .eq('id', tagId)
+
+      if (error) throw error
+      await loadFood() // 重新載入所有資料
+      
+      return true
+    } catch (err) {
+      console.error('更新標籤失敗:', err)
+      setError('更新標籤失敗')
+      return false
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     loadFood()
   }, [])
@@ -260,6 +292,7 @@ export function useFoodData() {
     updateFood,
     deleteFood,
     addTag,
+    updateTag,
     deleteTag,
     reload: loadFood
   }

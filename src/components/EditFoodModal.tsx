@@ -132,7 +132,7 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
         {/* 標題 */}
         <div className="bg-blue-500 text-white p-5 flex justify-between items-center">
           <h3 className="text-xl font-semibold">編輯餐點</h3>
-          <button onClick={onClose} className="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center">
+          <button onClick={onClose} className="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center cursor-pointer">
             ×
           </button>
         </div>
@@ -145,7 +145,7 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="輸入餐點名稱"
-              className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-gray-800 placeholder:text-gray-500"
+              className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-gray-900 placeholder:text-gray-600"
             />
           </div>
 
@@ -167,7 +167,7 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
                 <button
                   type="button"
                   onClick={clearImage}
-                  className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm hover:bg-red-600"
+                  className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm hover:bg-red-600 cursor-pointer"
                 >
                   ×
                 </button>
@@ -276,7 +276,7 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
             <button
               type="button"
               onClick={onDelete}
-              className="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors"
+              className="flex-1 bg-red-500 text-white py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors cursor-pointer"
             >
               刪除餐點
             </button>
@@ -286,7 +286,7 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
               className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
                 isUploading 
                   ? 'bg-gray-400 cursor-not-allowed' 
-                  : 'bg-blue-500 text-white hover:bg-blue-600'
+                  : 'bg-blue-500 text-white hover:bg-blue-600 cursor-pointer'
               }`}
             >
               {isUploading ? '上傳中...' : '儲存'}
