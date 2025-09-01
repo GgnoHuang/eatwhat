@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { FoodItem } from '@/hooks/useFoodData'
+import { uploadImage, compressImage, deleteImage } from '@/utils/imageUpload'
 
 interface Props {
   categories: string[]
@@ -21,28 +22,100 @@ interface Props {
 export default function EditFoodModal({ categories, initialData, onSubmit, onClose, onDelete, onManageTags }: Props) {
   const [name, setName] = useState(initialData.name)
   const [imageUrl, setImageUrl] = useState(initialData.imageUrl || '')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState('')
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [price, setPrice] = useState(initialData.price)
   const [taste, setTaste] = useState(initialData.taste)
   const [selectedTags, setSelectedTags] = useState<string[]>(initialData.tags)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!name.trim()) {
       alert('請輸入餐點名稱！')
       return
     }
-    if (selectedTags.length === 0) {
-      alert('請至少選擇一個標籤！')
-      return
-    }
+    // 標籤可以為空，移除這個驗證
 
-    onSubmit({
-      name: name.trim(),
-      imageUrl: imageUrl.trim() || undefined,
-      price,
-      taste,
-      tagNames: selectedTags
-    })
+    setIsUploading(true)
+    let finalImageUrl = imageUrl.trim()
+
+    try {
+      // 如果有選擇新檔案，先上傳圖片
+      if (selectedFile) {
+        const compressedFile = await compressImage(selectedFile)
+        const uploadedUrl = await uploadImage(compressedFile)
+        if (uploadedUrl) {
+          // 刪除舊圖片（如果有的話）
+          if (initialData.imageUrl) {
+            await deleteImage(initialData.imageUrl)
+          }
+          finalImageUrl = uploadedUrl
+        } else {
+          throw new Error('圖片上傳失敗')
+        }
+      }
+
+      onSubmit({
+        name: name.trim(),
+        imageUrl: finalImageUrl || undefined,
+        price,
+        taste,
+        tagNames: selectedTags
+      })
+    } catch (error) {
+      console.error('提交失敗:', error)
+      const errorMessage = error instanceof Error ? error.message : '提交失敗，請稍後再試！'
+      alert(errorMessage)
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // 檢查檔案大小 (5MB)
+      const maxSize = 5 * 1024 * 1024
+      if (file.size > maxSize) {
+        alert('圖片檔案不能超過 5MB')
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+        return
+      }
+      
+      // 檢查檔案類型
+      const fileExtension = file.name.toLowerCase().split('.').pop()
+      const validExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'heif']
+      
+      if (!file.type.startsWith('image/') && !validExtensions.includes(fileExtension || '')) {
+        alert('請選擇圖片檔案 (支援 JPG, PNG, GIF, WebP, HEIC 格式)')
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''
+        }
+        return
+      }
+      
+      setSelectedFile(file)
+      
+      // 創建預覽圖
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setPreviewUrl(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const clearImage = () => {
+    setSelectedFile(null)
+    setImageUrl('')
+    setPreviewUrl('')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   const toggleTag = (tag: string) => {
@@ -54,10 +127,10 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-2xl scale-in">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg scale-in">
         {/* 標題 */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-5 flex justify-between items-center">
+        <div className="bg-blue-500 text-white p-5 flex justify-between items-center">
           <h3 className="text-xl font-semibold">編輯餐點</h3>
           <button onClick={onClose} className="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center">
             ×
@@ -76,15 +149,50 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
             />
           </div>
 
-          {/* 圖片網址 */}
+          {/* 圖片上傳 */}
           <div>
-            <input
-              type="url"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
-              placeholder="輸入圖片網址（選填）"
-              className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-gray-800 placeholder:text-gray-500"
-            />
+            <label className="block text-sm font-medium text-gray-700 mb-2">餐點圖片：</label>
+            
+            {/* 預覽區域 */}
+            {(previewUrl || imageUrl) && (
+              <div className="relative mb-3 w-full h-32 rounded-lg overflow-hidden border-2 border-gray-200">
+                <img 
+                  src={previewUrl || imageUrl} 
+                  alt="預覽" 
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={clearImage}
+                  className="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm hover:bg-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
+            {/* 上傳按鈕 */}
+            <div className="flex gap-2 mb-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*,.heic,.heif"
+                onChange={handleFileSelect}
+                className="hidden"
+                id="imageUploadEdit"
+              />
+              <label
+                htmlFor="imageUploadEdit"
+                className="flex-1 px-4 py-3 bg-blue-500 text-white rounded-lg cursor-pointer hover:bg-blue-600 transition-colors text-center font-medium"
+              >
+                {selectedFile ? `已選擇: ${selectedFile.name}` : '更換圖片'}
+              </label>
+            </div>
+
+            {/* 移除 URL 輸入，只支援檔案上傳 */}
           </div>
 
           {/* 價格等級 */}
@@ -174,9 +282,14 @@ export default function EditFoodModal({ categories, initialData, onSubmit, onClo
             </button>
             <button
               type="submit"
-              className="flex-1 bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+              disabled={isUploading}
+              className={`flex-1 py-3 rounded-lg font-semibold transition-colors ${
+                isUploading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-blue-500 text-white hover:bg-blue-600'
+              }`}
             >
-              保存修改
+              {isUploading ? '上傳中...' : '儲存'}
             </button>
           </div>
         </form>

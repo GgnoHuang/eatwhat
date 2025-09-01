@@ -97,9 +97,9 @@ export default function FoodWheel() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 to-blue-200 p-5">
-      <div className="max-w-6xl mx-auto bg-white rounded-3xl p-5 shadow-2xl fade-in">
-        <h1 className="text-4xl font-bold text-center text-gray-700 mb-5 slide-in-top">
+    <div className="min-h-screen bg-blue-100 p-5">
+      <div className="max-w-6xl mx-auto bg-white rounded-3xl p-5 shadow-lg fade-in">
+        <h1 className="text-4xl font-bold text-center text-gray-700 mb-5 text-focus-in" style={{ fontFamily: 'Comic Sans MS, Microsoft JhengHei, cursive, sans-serif' }}>
           吃啥？
         </h1>
 

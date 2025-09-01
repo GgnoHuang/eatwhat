@@ -275,7 +275,12 @@ SUPABASE_API_KEY=your_actual_api_key_here
 - ✅ 價格等級設定
 - ✅ 好吃程度評分
 - ✅ 圖片網址支援
+- ✅ **圖片上傳到 Supabase Storage**
+- ✅ 圖片壓縮優化
+- ✅ 圖片預覽功能
 - ✅ 排序功能
+- ✅ **轉盤圖片顯示**
+- ✅ **智能文字換行系統 (無截斷設計)**
 
 ### 待實現功能
 - ⏸️ 標籤編輯功能
@@ -645,13 +650,174 @@ this.items = data.map(food => ({
 
 觸發器處理所有複雜的關聯邏輯，前端只需專注於 UI/UX！
 
+## 🎡 轉盤智能文字換行系統
+
+### 設計理念：**不截斷，只換行**
+基於用戶需求「爆框也沒關係，我故意的」，系統設計為完全不截斷任何文字，只做智能換行處理。
+
+### 📝 換行規則與字體大小
+
+#### 1. **短名稱 (≤4字)**
+- **顯示方式**: 單行顯示
+- **字體大小**: 30px
+- **適用範例**: "牛排", "拉麵", "壽司", "漢堡"
+- **特色**: 最大字體，醒目顯示
+
+#### 2. **中等名稱 (5-8字)**
+- **顯示方式**: 分兩行顯示
+- **字體大小**: 26px
+- **行間距**: 20px (上行 y=-10, 下行 y=10)
+- **分行邏輯**: `Math.ceil(length / 2)` 平均分配
+- **適用範例**: "義大利麵", "韓式烤肉", "日式拉麵"
+
+#### 3. **長名稱 (9-12字)**
+- **顯示方式**: 分三行顯示
+- **字體大小**: 22px
+- **行間距**: 14px (y座標: -14, 0, 14)
+- **分行邏輯**: `Math.ceil(length / 3)` 三等分
+- **適用範例**: "奶油培根義大利麵", "韓式辣椒醬炸雞"
+
+#### 4. **超長名稱 (>12字)**
+- **顯示方式**: 分四行顯示
+- **字體大小**: 20px
+- **行間距**: 12px (y座標: -18, -6, 6, 18)
+- **分行邏輯**: `Math.ceil(length / 4)` 四等分
+- **適用範例**: "超級無敵巨無霸起司牛肉堡套餐"
+- **特色**: 任意長度都能完整顯示，絕不截斷
+
+### 🎨 視覺效果特色
+
+1. **漸進式字體縮放**: 
+   - 30px → 26px → 22px → 20px
+   - 確保長文字也有足夠可讀性
+
+2. **爆框美學**:
+   - **故意設計**: 長文字可以溢出轉盤扇形區域
+   - **視覺衝擊**: 創造有趣的視覺層次
+   - **完整資訊**: 保證所有餐點名稱完整顯示
+
+3. **一致的視覺元素**:
+   - 統一的 Comic Sans MS 字體
+   - 白色文字配深色陰影
+   - drop-shadow 濾鏡效果
+
+### 🔧 技術實現
+
+```javascript
+// 智能分行算法
+const name = item.name
+if (name.length <= 4) {
+  // 單行 30px
+} else if (name.length <= 8) {
+  const mid = Math.ceil(name.length / 2)
+  const line1 = name.slice(0, mid)
+  const line2 = name.slice(mid)
+  // 雙行 26px
+} else if (name.length <= 12) {
+  const third = Math.ceil(name.length / 3)
+  // 三行 22px，三等分邏輯
+} else {
+  const quarter = Math.ceil(name.length / 4)
+  // 四行 20px，四等分邏輯
+}
+```
+
+### 💡 設計優勢
+
+- **零資訊丟失**: 絕對不截斷任何字符
+- **視覺層次**: 通過字體大小區分名稱長度
+- **個性表達**: 爆框設計體現個性化需求
+- **完美可讀**: 即使是超長名稱也保持清晰可讀
+- **動態適應**: 自動根據名稱長度選擇最佳顯示方案
+
+這套系統體現了「功能優於形式」的設計思想，確保用戶的每個餐點名稱都能完整、清晰地在轉盤上展示。
+
+## Supabase Storage 圖片上傳功能
+
+### 🏗️ 架構設計
+- **Storage Bucket**: `food-images` (公開存取)
+- **上傳路徑**: `foods/{timestamp}-{random}.{ext}`
+- **圖片壓縮**: 最大寬度 800px，品質 80%
+- **檔案大小限制**: 5MB
+- **支援格式**: 所有圖片格式 (`image/*`)
+
+### 🚀 功能特色
+- ✅ **拖拽上傳**：支援檔案選擇器上傳
+- ✅ **圖片預覽**：即時預覽選擇的圖片
+- ✅ **自動壓縮**：上傳前自動壓縮優化
+- ✅ **URL 支援**：同時支援外部圖片網址
+- ✅ **舊圖清理**：編輯時自動刪除舊圖片
+- ✅ **錯誤處理**：完善的錯誤提示機制
+
+### 🔧 使用方式
+
+#### 1. Supabase 設置
+
+**方式一：在 Dashboard 創建（推薦）**
+1. 進入 Supabase Dashboard → Storage
+2. 點擊 "Create bucket"
+3. 名稱：`food-images`
+4. ✅ 勾選 "Public bucket" 
+5. ❌ **不要** 勾選 "Restrict uploads to mime types"
+6. 點擊 "Create bucket"
+
+**方式二：SQL 創建**
+```sql
+-- 創建公開的 Storage Bucket（不需要 RLS）
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('food-images', 'food-images', true);
+```
+
+> 💡 **重要提醒**：設為 Public Bucket 後，所有檔案都可公開存取，**不需要設定 RLS 政策**！
+
+#### 2. 環境變數
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://dnavwekoeilhdsateevn.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+```
+
+#### 3. 使用 Utility 函數
+```typescript
+import { uploadImage, compressImage, deleteImage } from '@/utils/imageUpload'
+
+// 上傳圖片
+const file = document.querySelector('input[type="file"]').files[0]
+const compressedFile = await compressImage(file)
+const imageUrl = await uploadImage(compressedFile)
+
+// 刪除圖片
+await deleteImage(oldImageUrl)
+```
+
+### 📱 使用者體驗
+
+#### 新增餐點
+1. 點擊「上傳圖片」按鈕選擇檔案
+2. 即時預覽所選圖片
+3. 或者貼上外部圖片網址
+4. 提交時自動壓縮並上傳到 Supabase
+
+#### 編輯餐點
+1. 顯示現有圖片（如果有）
+2. 點擊「更換圖片」上傳新圖片
+3. 自動刪除舊圖片，避免存儲空間浪費
+4. 支援清空圖片功能
+
+### 🔐 安全考量
+- 檔案類型驗證（僅允許圖片）
+- 檔案大小限制（5MB）
+- 自動生成唯一檔名避免衝突
+- 公開 bucket 但路徑難以猜測
+
 ## 檔案結構
 ```
 吃啥/
 ├── src/                # 原始碼目錄
 │   ├── app/           # Next.js App Router 頁面
 │   ├── components/    # React 組件
-│   └── hooks/         # 自定義 Hooks
+│   ├── hooks/         # 自定義 Hooks
+│   └── utils/         # 工具函數
+│       └── imageUpload.ts # 圖片上傳工具
 ├── public/            # 靜態資源
 ├── backup-original/   # 原版 HTML/JS 備份
 ├── .env.local         # 本地環境變數配置（不提交到 Git）

@@ -37,10 +37,10 @@ export default function TagManagementModal({ categories, onAddTag, onDeleteTag, 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 fade-in">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-2xl scale-in">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 fade-in">
+      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg scale-in">
         {/* 標題 */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-5 flex justify-between items-center">
+        <div className="bg-blue-500 text-white p-5 flex justify-between items-center">
           <h3 className="text-xl font-semibold">標籤管理</h3>
           <button onClick={onClose} className="text-white hover:bg-white/20 w-8 h-8 rounded-full flex items-center justify-center">
             ×
