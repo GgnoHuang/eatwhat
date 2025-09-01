@@ -27,6 +27,7 @@ export function useFoodData() {
       const { data: tags, error } = await supabase
         .from('tag')
         .select('*')
+        .order('created_at', { ascending: true }) // 按創建時間排序，保持一致順序
 
       if (error) throw error
 

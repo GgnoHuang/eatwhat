@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Confetti from 'react-confetti'
 
 interface Props {
   items: Array<{ name: string; imageUrl?: string }>
@@ -11,6 +12,7 @@ export default function WheelSpinner({ items }: Props) {
   const [result, setResult] = useState('')
   const [rotation, setRotation] = useState(0)
   const [animationDuration, setAnimationDuration] = useState(0)
+  const [showConfetti, setShowConfetti] = useState(false)
 
   const spin = () => {
     if (items.length === 0) {
@@ -22,6 +24,7 @@ export default function WheelSpinner({ items }: Props) {
 
     setIsSpinning(true)
     setResult('')
+    setShowConfetti(false) // 重置彩帶
 
     // 計算隨機角度和時間
     const spins = 5 + Math.random() * 4 // 5-9圈
@@ -42,6 +45,10 @@ export default function WheelSpinner({ items }: Props) {
 
       setResult(`🎉 ${selectedItem.name}`)
       setIsSpinning(false)
+      setShowConfetti(true) // 顯示彩帶特效
+      
+      // 3秒後關閉彩帶
+      setTimeout(() => setShowConfetti(false), 3000)
     }, duration)
   }
 
@@ -51,16 +58,39 @@ export default function WheelSpinner({ items }: Props) {
   ]
 
   return (
-    <div className="text-center my-8 bounce-in">
+    <div className="text-center my-8 bounce-in relative">
+      {/* 彩帶特效 */}
+      {showConfetti && (
+        <Confetti
+          width={typeof window !== 'undefined' ? window.innerWidth : 1000}
+          height={typeof window !== 'undefined' ? window.innerHeight : 800}
+          recycle={false}
+          numberOfPieces={200}
+          gravity={0.3}
+        />
+      )}
       <div className="relative mx-auto w-80 h-80">
+        {/* 轉動時的光環特效 */}
+        {isSpinning && (
+          <>
+            <div className="absolute -inset-4 rounded-full border-4 border-yellow-400 animate-ping opacity-75"></div>
+            <div className="absolute -inset-2 rounded-full border-2 border-orange-400 animate-pulse opacity-60"></div>
+            <div className="absolute -inset-6 rounded-full border-8 border-red-500 animate-spin opacity-40" 
+                 style={{animationDuration: '1s'}}></div>
+          </>
+        )}
+        
         {/* 轉盤 */}
         <div 
-          className={`relative w-full h-full rounded-full border-4 border-blue-600 overflow-hidden ${
-            isSpinning ? 'transition-transform ease-out' : ''
+          className={`relative w-full h-full rounded-full border-4 overflow-hidden ${
+            isSpinning 
+              ? 'transition-transform ease-out border-yellow-400 shadow-2xl shadow-yellow-400/50' 
+              : 'border-blue-600'
           }`}
           style={{ 
             transform: `rotate(${rotation}deg)`,
-            transitionDuration: isSpinning ? `${animationDuration}ms` : '0ms'
+            transitionDuration: isSpinning ? `${animationDuration}ms` : '0ms',
+            boxShadow: isSpinning ? '0 0 30px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.4)' : ''
           }}
         >
           {items.length > 0 ? (
@@ -324,27 +354,52 @@ export default function WheelSpinner({ items }: Props) {
         </div>
         
         {/* 指針 */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent border-b-blue-600 z-10"></div>
+        <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-0 h-0 border-l-4 border-r-4 border-b-6 border-l-transparent border-r-transparent z-10 transition-all ${
+          isSpinning 
+            ? 'border-b-yellow-400 animate-pulse shadow-lg shadow-yellow-400/70' 
+            : 'border-b-blue-600'
+        }`}
+        style={{
+          filter: isSpinning ? 'drop-shadow(0 0 10px rgba(251, 191, 36, 0.8))' : ''
+        }}></div>
       </div>
 
       {/* 控制按鈕 */}
-      <button
-        onClick={spin}
-        disabled={isSpinning}
-        className={`mt-6 px-8 py-4 text-lg font-bold text-white rounded-full shadow transition-all ${
-          isSpinning 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-blue-500 hover:bg-blue-600 hover:-translate-y-1 hover:scale-105 heartbeat cursor-pointer'
-        }`}
-        style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}
-      >
-        {isSpinning ? '轉轉中...' : '開始轉轉'}
-      </button>
+      <div className="relative">
+        {/* 按鈕周圍的火焰效果 */}
+        {isSpinning && (
+          <>
+            <div className="absolute -inset-2 bg-gradient-to-r from-red-500 via-orange-500 to-yellow-500 rounded-full animate-pulse opacity-60 blur-sm"></div>
+            <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full animate-ping opacity-40"></div>
+          </>
+        )}
+        
+        <button
+          onClick={spin}
+          disabled={isSpinning}
+          className={`relative mt-6 px-8 py-4 text-lg font-bold text-white rounded-full shadow transition-all ${
+            isSpinning 
+              ? 'bg-gradient-to-r from-red-500 to-orange-500 cursor-not-allowed animate-bounce shadow-2xl shadow-red-500/50' 
+              : 'bg-blue-500 hover:bg-blue-600 hover:-translate-y-1 hover:scale-105 heartbeat cursor-pointer'
+          }`}
+          style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}
+        >
+          {isSpinning ? '🔥 轉轉中... 🔥' : '🎯 開始轉轉 🎯'}
+        </button>
+      </div>
 
       {/* 結果 */}
       {result && (
-        <div className="mt-6 text-2xl font-bold text-blue-600 bounce-in" style={{ fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif' }}>
-          {result}
+        <div className="relative">
+          {/* 結果周圍的爆炸效果 */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 rounded-lg animate-pulse opacity-30 blur-md"></div>
+          <div className="relative mt-6 text-3xl font-bold bg-gradient-to-r from-yellow-400 via-red-500 to-pink-500 bg-clip-text text-transparent bounce-in animate-bounce" 
+               style={{ 
+                 fontFamily: 'DFKai-SB, KaiTi, STKaiti, serif',
+                 textShadow: '0 0 20px rgba(255, 215, 0, 0.8)'
+               }}>
+            ✨ {result} ✨
+          </div>
         </div>
       )}
     </div>
