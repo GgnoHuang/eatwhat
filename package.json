@@ -1,22 +1,28 @@
 {
-  "name": "wheel-of-food",
-  "version": "1.0.0",
-  "description": "轉盤選餐應用程式",
-  "main": "index.html",
+  "name": "food-wheel-react",
+  "version": "0.1.0",
+  "private": true,
   "scripts": {
-    "dev": "live-server --port=3000 --open=/index.html",
-    "start": "live-server --port=3000 --open=/index.html",
-    "install-deps": "npm install -g live-server"
+    "dev": "next dev --turbopack",
+    "build": "next build --turbopack",
+    "start": "next start",
+    "lint": "eslint"
   },
-  "keywords": [
-    "wheel",
-    "food",
-    "random",
-    "selector"
-  ],
-  "author": "",
-  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.56.1",
+    "next": "15.5.2",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
   "devDependencies": {
-    "live-server": "^1.2.2"
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.2",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

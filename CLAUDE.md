@@ -5,29 +5,25 @@
 
 ## 技術架構
 
-### 🔄 雙版本並存
-
-**原版 (HTML/CSS/JS)**:
-- **前端**: HTML + CSS + JavaScript (ES6+)
-- **後端**: Supabase PostgreSQL 
-- **API**: Supabase REST API
-- **啟動**: `npm run dev` (位於 `/吃啥/`)
-- **地址**: http://127.0.0.1:51155
-
-**新版 (Next.js/React)**:
+### 🚀 Next.js 版本 (主要版本)
 - **框架**: Next.js 15 + React 19 + TypeScript
 - **樣式**: Tailwind CSS
-- **後端**: Supabase PostgreSQL (相同資料庫)
+- **後端**: Supabase PostgreSQL
 - **狀態管理**: Custom Hooks + React State
-- **啟動**: `npm run dev` (位於 `/food-wheel-react/`)
+- **啟動**: `npm run dev`
 - **地址**: http://localhost:3000
 
-### 🚀 推薦使用 Next.js 版本
+### ✨ 優勢
 - ✅ 更好的性能優化
 - ✅ 現代化開發體驗
 - ✅ 類型安全 (TypeScript)
 - ✅ 自動代碼分割
 - ✅ 容易部署到 Vercel
+- ✅ SEO 友善
+- ✅ 服務端渲染支援
+
+### 📁 原版備份
+原版 HTML/CSS/JS 檔案已備份至 `backup-original/` 資料夾
 
 ## 資料庫設計
 
@@ -652,13 +648,18 @@ this.items = data.map(food => ({
 ## 檔案結構
 ```
 吃啥/
-├── index.html          # 主頁面
-├── script.js           # 主要業務邏輯
-├── style.css           # 樣式檔案
-├── env.js              # 環境變數載入腳本
-├── .env.local          # 本地環境變數配置（不提交到 Git）
-├── .env.example        # 環境變數範例文件
-├── .gitignore          # Git 忽略文件配置
-├── package.json        # 項目配置和依賴
-└── CLAUDE.md           # 專案說明 (本檔案)
+├── src/                # 原始碼目錄
+│   ├── app/           # Next.js App Router 頁面
+│   ├── components/    # React 組件
+│   └── hooks/         # 自定義 Hooks
+├── public/            # 靜態資源
+├── backup-original/   # 原版 HTML/JS 備份
+├── .env.local         # 本地環境變數配置（不提交到 Git）
+├── .env.example       # 環境變數範例文件
+├── .gitignore         # Git 忽略文件配置
+├── package.json       # 項目配置和依賴
+├── next.config.ts     # Next.js 配置
+├── tailwind.config.ts # Tailwind CSS 配置
+├── tsconfig.json      # TypeScript 配置
+└── CLAUDE.md          # 專案說明 (本檔案)
 ```

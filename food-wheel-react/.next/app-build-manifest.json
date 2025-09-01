@@ -1,0 +1,24 @@
+{
+  "pages": {
+    "/page": [
+      "static/chunks/08dad_next_dist_33cef86c._.js",
+      "static/chunks/food-wheel-react_src_app_favicon_ico_mjs_efc2b1c1._.js",
+      "static/chunks/[root-of-the-server]__65f425e6._.css",
+      "static/chunks/food-wheel-react_src_app_layout_tsx_d9a3d5ec._.js",
+      "static/chunks/08dad_next_dist_client_components_builtin_global-error_571563af.js",
+      "static/chunks/08dad_@supabase_node-fetch_browser_1ce5a49b.js",
+      "static/chunks/food-wheel-react_src_d7f38605._.js",
+      "static/chunks/08dad_7f6aec5a._.js",
+      "static/chunks/food-wheel-react_src_app_page_tsx_571563af._.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_a16abc9e._.js",
+      "static/chunks/08dad_next_dist_compiled_react-dom_225cddd0._.js",
+      "static/chunks/08dad_next_dist_compiled_next-devtools_index_7e67ac6a.js",
+      "static/chunks/08dad_next_dist_compiled_26ad7da2._.js",
+      "static/chunks/08dad_next_dist_client_cd5bd405._.js",
+      "static/chunks/08dad_next_dist_84dac691._.js",
+      "static/chunks/08dad_@swc_helpers_cjs_2bf5d156._.js",
+      "static/chunks/food-wheel-react_a0ff3932._.js",
+      "static/chunks/turbopack-food-wheel-react_d034fca9._.js"
+    ]
+  }
+}
