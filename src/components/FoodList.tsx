@@ -117,7 +117,7 @@ export default function FoodList({
                 onClick={() => onEditFood(item)}
                 className="bg-white bg-opacity-90 text-gray-700 w-6 h-6 rounded text-xs flex items-center justify-center hover:bg-opacity-100 transition-all shadow cursor-pointer"
               >
-                ✏️
+                ✎
               </button>
             </div>
 
