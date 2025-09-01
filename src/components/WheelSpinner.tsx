@@ -6,9 +6,10 @@ import { motion } from 'framer-motion'
 
 interface Props {
   items: Array<{ name: string; imageUrl?: string }>
+  onSpinningChange?: (spinning: boolean) => void
 }
 
-export default function WheelSpinner({ items }: Props) {
+export default function WheelSpinner({ items, onSpinningChange }: Props) {
   const [isSpinning, setIsSpinning] = useState(false)
   const [result, setResult] = useState('')
   const [rotation, setRotation] = useState(0)
@@ -27,9 +28,7 @@ export default function WheelSpinner({ items }: Props) {
 
     setIsSpinning(true)
     setResult('')
-    setShowConfetti(false) // 重置彩帶
-    setShowFireworks(false) // 重置煙火
-    setScreenShake(false) // 重置震動
+    onSpinningChange?.(true) // 通知父組件開始轉動
 
     // 計算隨機角度和時間
     const spins = 5 + Math.random() * 4 // 5-9圈
@@ -50,16 +49,7 @@ export default function WheelSpinner({ items }: Props) {
 
       setResult(`🎉 ${selectedItem.name}`)
       setIsSpinning(false)
-      
-      // 超級爆炸組合特效！
-      setShowConfetti(true) // 彩帶
-      setShowFireworks(true) // 煙火
-      setScreenShake(true) // 螢幕震動
-      
-      // 階段性關閉特效
-      setTimeout(() => setScreenShake(false), 800) // 0.8秒後停止震動
-      setTimeout(() => setShowFireworks(false), 4000) // 4秒後關閉煙火
-      setTimeout(() => setShowConfetti(false), 5000) // 5秒後關閉彩帶
+      onSpinningChange?.(false) // 通知父組件結束轉動
     }, duration)
   }
 

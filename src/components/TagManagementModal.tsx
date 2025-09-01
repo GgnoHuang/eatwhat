@@ -66,8 +66,14 @@ export default function TagManagementModal({ categories, onAddTag, onUpdateTag, 
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 fade-in">
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg scale-in">
+    <div 
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-hidden shadow-lg scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* 標題 */}
         <div className="bg-blue-500 text-white p-5 flex justify-between items-center">
           <h3 className="text-xl font-semibold">標籤管理</h3>
