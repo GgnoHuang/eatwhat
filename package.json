@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.56.1",
+    "framer-motion": "^12.23.12",
     "next": "15.5.2",
     "react": "19.1.0",
     "react-confetti": "^6.4.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "react-particles": "^2.12.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
